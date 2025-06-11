@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+
+#-------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 16-05-2025
+# Description: Print log messages with timestamp and log level
+#-------------------------------------------------------------------------------
+
+export LANG=C
+
+if [[ "${0}" == "${BASH_SOURCE[0]}" ]]; then
+  echo "This script must be sourced, not executed." >&2
+  exit 1
+fi
+
+declare LOGGER_NO_TIMESTAMP=""
+declare LOGGER_NO_STACK=""
+declare LOGGER_COLOR=""
+
+create_stacktrace() {
+  # Loop through array
+  for func in "${@}"; do
+    # Build trace appent func before last func
+    local trace="${func:+".$(/bin/echo "${func}" | /usr/bin/awk '{print $2}')"}${trace}"
+  done
+
+  # concatenate string with ScriptName.trace:LineNr
+  __STACK__="at $(/usr/bin/basename "${0}")${trace}:$(/bin/echo "${functions[0]}" | /usr/bin/awk '{print $1}')"
+}
+
+log() {
+  local log_level="${1:-"warn"} "
+  local log_message="${2:-"No log message provided!"}"
+  local log_timestamp=""
+
+  # If var LOGGER_NO_TIMESTAMP not set use timestamp
+  if [[ -z ${LOGGER_NO_TIMESTAMP// } ]]; then
+    log_timestamp="$(date +'%Y-%m-%dT%H:%M:%S%z') "
+  fi
+
+  # Fix problem running scriopt in cronjob
+  # error: tput: No value for $TERM and no -T specified
+  # Use colors only if a terminal is available
+  if [[ -z "${TERM// }" ]] || [[ "${TERM// }" == "dumb" ]]; then
+    local LOGGER_COLOR=""
+  fi
+
+  case ${log_level// } in
+    trace|TRACE)
+      if [[ -z "${LOGGER_NO_STACK// }" ]]; then
+        # Create Arry with "LineNr FuncName ScriptName"
+        functions=()
+        local frame=0
+        while caller ${frame} > /dev/null 2>&1; do
+            functions+=("$(caller ${frame})")
+            ((frame++))
+        done
+
+        create_stacktrace "${functions[@]}"
+      fi
+
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="TRACE "
+
+      else
+        log_level="$(tput setaf 7)TRACE$(tput sgr0) "
+      fi
+      ;;
+    debug|DEBUG)
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="DEBUG "
+      else
+        log_level="$(tput setaf 4)DEBUG$(tput sgr0) "
+      fi
+      ;;
+    info|INFO)
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="INFO  "
+      else
+        log_level="$(tput setaf 2)INFO$(tput sgr0)  "
+      fi
+      ;;
+    warn|WARN|warning|WARNING)
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="WARN  "
+      else
+        log_level="$(tput setaf 3)WARN$(tput sgr0)  "
+      fi
+      ;;
+    error|ERROR)
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="ERROR "
+      else
+        log_level="$(tput setaf 9)ERROR$(tput sgr0) "
+      fi
+      ;;
+    fatal|FATAL)
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="FATAL "
+      else
+        log_level="$(tput setaf 1)FATAL$(tput sgr0) "
+      fi
+      ;;
+    *)
+      if [[ -z "${LOGGER_COLOR// }" ]]; then
+        log_level="ERROR "
+      else
+        log_level="$(tput setaf 9)ERROR$(tput sgr0) "
+      fi
+      printf "${log_timestamp}${log_level}%s\n" "No log level like \"${1}\""
+      return 1
+      ;;
+  esac
+
+  # Print log message
+  if [[ -z "${LOGGER_NO_STACK// }" ]] || [[ -n "${__STACK__// }" ]]; then
+    # Print stacktrace if set
+    printf "${log_timestamp}${log_level}${__STACK__:+"[$__STACK__] "}%s\n" "${log_message}"
+    unset __STACK__
+  else
+    printf "${log_timestamp}${log_level}%s\n" "${log_message}"
+  fi
+}
+
+
+# Deprecated - Use log "trace" instead
+# Still there for backward compatibility
+log_trace(){
+  log "trace" "${*}"
+}
+
+# Deprecated - Use log "debug" instead
+# Still there for backward compatibility
+log_debug(){
+  log "debug" "${*}"
+}
+
+# Deprecated - Use log "info" instead
+# Still there for backward compatibility
+log_info(){
+  log "info" "${*}"
+}
+
+# Deprecated - Use log "info" instead
+# Still there for backward compatibility
+log_ok(){
+  log "info" "${*}"
+}
+
+# Deprecated - Use log "warn" instead
+# Still there for backward compatibility
+log_warn(){
+  log "warn" "${*}"
+}
+
+# Deprecated - Use log "error" instead
+# Still there for backward compatibility
+log_error(){
+  log "error" "${*}"
+}
+
+# Deprecated - Use log "fatal" instead
+# Still there for backward compatibility
+log_fatal(){
+  log "fatal" "${*}"
+}
