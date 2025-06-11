@@ -1,0 +1,40 @@
+# Ignore files created by IDE's
+.vscode/
+.devcontainer*
+.theia/
+.Trash*
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+.cache/
+known_hosts
+nohup.out
+$RECYCLE.BIN/
+[Dd]esktop.ini
+*~
+
+# Ignore packages
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Ignore Logs and databases
+*.log
+*.sql
+*.sqlite
