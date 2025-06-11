@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+#-------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 16-05-2025
+# Description: Download files from a given URL and save them to a specified destination
+#-------------------------------------------------------------------------------
+
+export LANG=C
+
+if [[ "${0}" == "${BASH_SOURCE[0]}" ]]; then
+  echo "This script must be sourced, not executed." >&2
+  exit 1
+fi
+
+function curl_download() {
+    local url="${1}"
+    local dst_path="${2}"
+    local dst_filename="${3}"
+    shift 3
+    local curl_opts=("${@}")
+
+    if ! command -v curl >/dev/null 2>&1; then
+        log "error" "\"curl\" command not found."
+        exit 1
+    fi
+
+    mkdir -p "${dst_path}"
+
+    if [[ -f "${dst_path}/${dst_filename}" ]]; then
+        log "info" "File already exists: \"${dst_path}/${dst_filename}\". Skipping download."
+    else
+        log "info" "Downloading \"${url}\" to \"${dst_path}/${dst_filename}\"..."
+        local http_status=$(curl -sSL -w "%{http_code}" ${curl_opts[@]} -o "${dst_path}/${dst_filename}" "${url}")
+
+        if [[ "${http_status}" != 2* ]]; then
+            log "error" "Download failed with HTTP status \"${http_status}\" (url: \"${url}\")."
+            rm -f "${dst_path}/${dst_filename}"
+            exit 1
+        fi
+    fi
+}
+
+
+function jf_download() {
+    local jf_url="${1}"
+    local dst_path="${2}"
+    local dst_filename="${3}"
+    shift 3
+    local jf_opts=("${@}")
+
+    if ! command -v jf >/dev/null 2>&1; then
+        log "error" "\"jf\" command not found."
+        exit 1
+    fi
+
+    mkdir -p "${dst_path}"
+
+    if [[ -f "${dst_path}/${dst_filename}" ]]; then
+        log "info" "File already exists: \"${dst_path}/${dst_filename}\". Skipping download."
+    else
+        log "info" "Downloading \"${jf_url}\" to \"${dst_path}/${dst_filename}\" using JFrog CLI..."
+        jf rt download ${jf_opts[@]} "${jf_url}" "${dst_path}/"
+        rc=$?
+
+        if [[ ${rc} -ne 0 ]]; then
+            log "error" "Download failed using JFrog CLI (Return code: \"${rc}\")."
+            exit 1
+        fi
+    fi
+}
+
+
+function github_download() {
+    local github_user="${1}"
+    local github_repo="${2}"
+    local github_branch="${3:-"main"}"
+    local github_path="${4:-"."}"
+    local dst_path="${5}"
+    local dst_name="${6}"
+    local curl_opts="${7:-""}"
+    local tar_opts="${8:-""}"
+
+    if ! command -v curl >/dev/null 2>&1; then
+        log "error" "\"curl\" command not found."
+        exit 1
+    fi
+
+    if ! command -v tar >/dev/null 2>&1; then
+        log "error" "\"tar\" command not found."
+        exit 1
+    fi
+
+    mkdir -p "${dst_path}"
+
+    if [[ -e "${dst_path}/${dst_name}" ]]; then
+        log "info" "File or directory already exists: \"${dst_path}/${dst_name}\". Skipping download."
+    else
+        local url="https://github.com/${github_user}/${github_repo}/archive/${github_branch}.tar.gz"
+        log "info" "Downloading \"${url}\" to \"${dst_path}/${dst_name}\"..."
+        curl -sSL ${curl_opts} ${url} | tar -vxz -C "${dst_path}" ${tar_opts} "${github_repo}-${github_branch}/${github_path}"
+    fi
+}
