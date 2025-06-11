@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+#-------------------------------------------------------------------------------
+# Author     : Florian Hild
+# Created    : 16-05-2025
+# Description: Validate checksum of a file
+#-------------------------------------------------------------------------------
+
+export LANG=C
+
+if [[ "${0}" == "${BASH_SOURCE[0]}" ]]; then
+  echo "This script must be sourced, not executed." >&2
+  exit 1
+fi
+
+function validate_sha512() {
+    local mode="${1}"
+    local checksum_source="${2}"
+    local file_path="${3}"
+
+    if ! command -v sha512sum >/dev/null 2>&1; then
+        log "error" "\"sha512sum\" command not found."
+        exit 1
+    fi
+
+    if [[ ! -f "${file_path}" ]]; then
+        log "error" "File not found: \"${file_path}\""
+        exit 1
+    fi
+
+    log "info" "Validating checksum for \"${file_path}\" (mode: ${mode})..."
+
+    case "$mode" in
+        url)
+            if curl -sSL "${checksum_source}" | awk "{print \$1 \"  ${file_path}\"}" | sha512sum -c - >/dev/null 2>&1; then
+                log "info" "Checksum validation passed for \"${file_path}\"."
+            else
+                log "error" "Checksum validation failed for \"${file_path}\"."
+                exit 1
+            fi
+            ;;
+        file)
+            if awk "{print \$1 \"  ${file_path}\"}" "${checksum_source}" | sha512sum -c - >/dev/null 2>&1; then
+                log "info" "Checksum validation passed for \"${file_path}\"."
+            else
+                log "error" "Checksum validation failed for \"${file_path}\"."
+                exit 1
+            fi
+            ;;
+        *)
+            log "error" "Invalid mode: \"${mode}\". Use \"url\" or \"file\"."
+            exit 1
+            ;;
+    esac
+}
+
+
+function validate_md5() {
+    local mode="${1}"
+    local checksum_source="${2}"
+    local file_path="${3}"
+
+    if ! command -v md5sum >/dev/null 2>&1; then
+        log "error" "\"md5sum\" command not found."
+        exit 1
+    fi
+
+    if [[ ! -f "${file_path}" ]]; then
+        log "error" "File not found: \"${file_path}\""
+        exit 1
+    fi
+
+    log "info" "Validating checksum for \"${file_path}\" (mode: ${mode})..."
+
+    case "${mode}" in
+        url)
+            if curl -sSL "${checksum_source}" | awk "{print \$1 \"  ${file_path}\"}" | md5sum -c - >/dev/null 2>&1; then
+                log "info" "Checksum validation passed for \"${file_path}\"."
+            else
+                log "error" "Checksum validation failed for \"${file_path}\"."
+                exit 1
+            fi
+            ;;
+        file)
+            if awk "{print \$1 \"  ${file_path}\"}" "${checksum_source}" | md5sum -c - >/dev/null 2>&1; then
+                log "info" "Checksum validation passed for \"${file_path}\"."
+            else
+                log "error" "Checksum validation failed for \"${file_path}\"."
+                exit 1
+            fi
+            ;;
+        *)
+            log "error" "Invalid mode: \"${mode}\". Use \"url\" or \"file\"."
+            exit 1
+            ;;
+    esac
+}
