@@ -3,10 +3,13 @@
 A Bash library that provides functions to validate checksums like md5 or sha512.
 
 ## Features
+
 You can provide cheksum file as url from a website or use a local file.
 
 ## Usage
+
 > ***Logger library are required for log messages!***
+
 ```
 import() {
     local module="${1}"

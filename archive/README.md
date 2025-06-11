@@ -3,7 +3,9 @@
 A Bash library that provides archive utils.
 
 ## Usage
+
 > ***Logger library are required for log messages!***
+
 ```
 import() {
     local module="${1}"
