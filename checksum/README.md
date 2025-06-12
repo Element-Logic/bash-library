@@ -15,7 +15,7 @@ import() {
     local module="${1}"
     local bash_lib_base_url='https://raw.githubusercontent.com/Element-Logic/bash-library/refs/heads/main'
     # Source the module
-    source <(curl -fsSL "${BASH_LIB_BASE_URL}/${module}/lib")
+    source <(curl -fsSL "${bash_lib_base_url}/${module}/lib")
 }
 
 import checksum
