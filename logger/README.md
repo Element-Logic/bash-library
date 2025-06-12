@@ -3,11 +3,13 @@
 A Bash library that provides a powerful `log` function for structured, colorized logging to stdout.
 
 ## Features
+
 - Colorized log levels
 - Customizable logging options
 - Stack trace with line numbers and function names
 
 ## Available Log Levels
+
 - `trace`
 - `debug`
 - `info`
@@ -16,6 +18,7 @@ A Bash library that provides a powerful `log` function for structured, colorized
 - `fatal`
 
 ## Usage
+
 ```
 import() {
     local module="${1}"
@@ -31,6 +34,7 @@ log "error" "Something went wrong"
 ```
 
 ## Options
+
 You can disable specific logging features by setting one of the following variables in your script:
 
 ```bash
@@ -46,6 +50,7 @@ unset LOGGER_COLOR
 ```
 
 ## Example
+
 ```bash
 import() {
     local module="${1}"
@@ -67,6 +72,7 @@ log "info" "Script execution completed."
 ```
 
 ### Example Output
+
 ```log
 $ ./test.sh
 2025-06-11T21:59:17+0200 TRACE [at test.sh.main.print_logs:16] Hello World!

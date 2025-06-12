@@ -3,7 +3,9 @@
 A Bash library that provides functions to copy or validate files.
 
 ## Usage
+
 > ***Logger library are required for log messages!***
+
 ```
 import() {
     local module="${1}"
