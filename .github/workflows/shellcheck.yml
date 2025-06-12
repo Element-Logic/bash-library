@@ -1,0 +1,22 @@
+---
+name: Spellcheck shell/bash stuff
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  check-shell-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install shellcheck
+        run: apt-get install shellcheck
+      - name: Run shellcheck
+        run: shellcheck `find ./ -type f -name "*lib"`
