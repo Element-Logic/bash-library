@@ -1,4 +1,4 @@
-# Bash-Librarie
+# Bash-Library
 
 A modular Bash standard library providing reusable shell scripting components for logging and more. Designed for maintainability, readability, and portability in Bash-based automation.
 
