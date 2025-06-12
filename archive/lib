@@ -31,6 +31,6 @@ function extract_tar() {
         mkdir -p "${dst_path}"
 
         log "info" "Extracting \"${tar_file}\" to \"${dst_path}\"..."
-        tar -x -v ${tar_opts[@]} -f "${tar_file}"  -C "${dst_path}"
+        tar -x -v "${tar_opts[@]}" -f "${tar_file}"  -C "${dst_path}"
     fi
 }

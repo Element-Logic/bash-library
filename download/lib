@@ -31,7 +31,8 @@ function curl_download() {
         log "info" "File already exists: \"${dst_path}/${dst_filename}\". Skipping download."
     else
         log "info" "Downloading \"${url}\" to \"${dst_path}/${dst_filename}\"..."
-        local http_status=$(curl -sSL -w "%{http_code}" ${curl_opts[@]} -o "${dst_path}/${dst_filename}" "${url}")
+        local http_status=""
+        http_status=$(curl -sSL -w "%{http_code}" "${curl_opts[@]}" -o "${dst_path}/${dst_filename}" "${url}")
 
         if [[ "${http_status}" != 2* ]]; then
             log "error" "Download failed with HTTP status \"${http_status}\" (url: \"${url}\")."
@@ -60,7 +61,7 @@ function jf_download() {
         log "info" "File already exists: \"${dst_path}/${dst_filename}\". Skipping download."
     else
         log "info" "Downloading \"${jf_url}\" to \"${dst_path}/${dst_filename}\" using JFrog CLI..."
-        jf rt download ${jf_opts[@]} "${jf_url}" "${dst_path}/"
+        jf rt download "${jf_opts[@]}" "${jf_url}" "${dst_path}/"
         rc=$?
 
         if [[ ${rc} -ne 0 ]]; then
@@ -78,7 +79,9 @@ function github_download() {
     local github_path="${4:-"."}"
     local dst_path="${5}"
     local dst_name="${6}"
+    # shellcheck disable=SC2178
     local curl_opts="${7:-""}"
+    # shellcheck disable=SC2178
     local tar_opts="${8:-""}"
 
     if ! command -v curl >/dev/null 2>&1; then
@@ -98,6 +101,7 @@ function github_download() {
     else
         local url="https://github.com/${github_user}/${github_repo}/archive/${github_branch}.tar.gz"
         log "info" "Downloading \"${url}\" to \"${dst_path}/${dst_name}\"..."
-        curl -sSL ${curl_opts} ${url} | tar -vxz -C "${dst_path}" ${tar_opts} "${github_repo}-${github_branch}/${github_path}"
+        # shellcheck disable=SC2128
+        curl -sSL "${curl_opts}" "${url}" | tar -vxz -C "${dst_path}" "${tar_opts}" "${github_repo}-${github_branch}/${github_path}"
     fi
 }

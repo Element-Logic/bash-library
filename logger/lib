@@ -19,22 +19,23 @@ declare LOGGER_COLOR=""
 
 create_stacktrace() {
   # Loop through array
-  for func in "$@"; do
+  for func in "${@}"; do
     # Build trace appent func before last func
-    local trace="${func:+".$(/bin/echo $func|/usr/bin/awk '{print $2}')"}${trace}"
+    local trace="${func:+".$(/bin/echo "${func}" | /usr/bin/awk '{print $2}')"}${trace}"
   done
 
   # concatenate string with ScriptName.trace:LineNr
-  __STACK__="at $(/usr/bin/basename $0)${trace}:$(/bin/echo ${functions[0]} | /usr/bin/awk '{print $1}')"
+  __STACK__="at $(/usr/bin/basename "${0}")${trace}:$(/bin/echo "${functions[0]}" | /usr/bin/awk '{print $1}')"
 }
 
 log() {
   local log_level="${1:-"warn"} "
   local log_message="${2:-"No log message provided!"}"
+  local log_timestamp=""
 
   # If var LOGGER_NO_TIMESTAMP not set use timestamp
   if [[ -z ${LOGGER_NO_TIMESTAMP// } ]]; then
-    local log_timestamp="$(date +'%Y-%m-%dT%H:%M:%S%z') "
+    log_timestamp="$(date +'%Y-%m-%dT%H:%M:%S%z') "
   fi
 
   # Fix problem running scriopt in cronjob
@@ -112,7 +113,7 @@ log() {
   esac
 
   # Print log message
-  if [[ -z "${LOGGER_NO_STACK// }" ]] || [[ ! -z "${__STACK__// }" ]]; then
+  if [[ -z "${LOGGER_NO_STACK// }" ]] || [[ -n "${__STACK__// }" ]]; then
     # Print stacktrace if set
     printf "${log_timestamp}${log_level}${__STACK__:+"[$__STACK__] "}%s\n" "${log_message}"
     unset __STACK__
