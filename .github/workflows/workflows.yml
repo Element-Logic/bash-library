@@ -11,6 +11,7 @@ on:
       - opened
       - synchronize
 
+# add comment
 jobs:
   call-shellcheck:
     uses: Element-Logic/github-workflows/.github/workflows/shellcheck.yml@feature/add-shellcheck
