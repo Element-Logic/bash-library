@@ -12,7 +12,7 @@ on:
       - synchronize
 
 jobs:
-  call-check-shell-syntax:
+  call-shellcheck:
     uses: Element-Logic/github-workflows/.github/workflows/shellcheck.yml@feature/add-shellcheck
     with:
       arguments: '`find ./ -type f -name "*lib"`'
