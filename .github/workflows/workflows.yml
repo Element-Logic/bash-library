@@ -1,0 +1,16 @@
+---
+name: Spellcheck shell/bash stuff
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  call-check-shell-syntax:
+    uses: Element-Logic/github-workflows/.github/workflows/shellcheck.yml@feature/add-shellcheck
