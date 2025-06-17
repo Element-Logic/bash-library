@@ -101,7 +101,7 @@ function github_download() {
     else
         local url="https://github.com/${github_user}/${github_repo}/archive/${github_branch}.tar.gz"
         log "info" "Downloading \"${url}\" to \"${dst_path}/${dst_name}\"..."
-        # shellcheck disable=SC2128
-        curl -sSL "${curl_opts}" "${url}" | tar -vxz -C "${dst_path}" "${tar_opts}" "${github_repo}-${github_branch}/${github_path}"
+        # shellcheck disable=SC2128 disable=SC2086
+        curl -sSL ${curl_opts} "${url}" | tar -vxz -C "${dst_path}" ${tar_opts} "${github_repo}-${github_branch}/${github_path}"
     fi
 }
